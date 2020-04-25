@@ -1,85 +1,181 @@
 'use strict';
+//Timing
+var simulationInterval = 1000;
+var simulationtimer = 0;
+//Color
 var bgcolor;
+var goalcolor;
+var leftArmyColor;
+var rightArmyColor;
+//Soldiers
 var soldiersize = 10;
 var soldiers = [];
+//Points
+var leftArmyPoints = 0;
+var rightArmyPoints = 0;
 
 function setup() {
-  //frameRate(2);
   createCanvas(1000,500);
   bgcolor = color(100);
+  leftArmyColor = color(0,0,255);
+  rightArmyColor = color(255,0,0);
+  goalcolor = color(50);
 }
-
-function draw() {
-  //Background image
-  background(100);
-  stroke('blue');
-  line(499,0,499,500);
-  stroke('red');
-  line(502,0,502,500);
-  
-  //Soldiers
-  for(let i = 0; i < soldiers.length; i++){
-    //soldiers[i].Hide();
-    soldiers[i].Move();
-    soldiers[i].Show();
+function draw() {  
+  loadPixels();
+  if(mouseIsPressed){
+    SpawnSoldier();
   }
   
+  DrawBG();
+  DrawSoldiers()
+
+  simulationtimer += deltaTime;
+  if(simulationtimer >= simulationInterval){
+    MoveSoldiers();
+    simulationtimer = 0;
+  }
+  
+  DrawGUI();
+}
+
+function DrawBG(){
+  background(100);
+  stroke('black');
+  line(500,0,500,500);
+  line(501,0,501,500);
+  noStroke();
+  fill(goalcolor);
+  rect(990,0,10,500);
+  rect(0,0,10,500);
+}
+
+function DrawGUI(){
   //mouse indicator
   stroke('black');
   noFill();
   var rastercoords = rasterPositionFromMouse();
   rect(rastercoords.x, rastercoords.y, soldiersize, soldiersize);
+
+  //score
+  text(leftArmyPoints + " Points",15,15);
+  text(rightArmyPoints + " Points",935,15);
 }
 
-function mouseClicked(){
+function DrawSoldiers(){
+  for(let i = 0; i < soldiers.length; i++){
+    soldiers[i].Show();
+  }
+}
+function MoveSoldiers(){
+  for(let i = 0; i < soldiers.length; i++){
+    soldiers[i].Act();
+  }
+}
+
+function SpawnSoldier(){
   var spawnpos = rasterPositionFromMouse();
+
+  //does not spawn anything if unit exists in this place
+  if(!SameColor(get(spawnpos.x+1,spawnpos.y+1),bgcolor)){
+    return;
+  }
   
-  //Decide side, default red
-  var movedir = createVector(-1,0);
-  var newSoldier = new Soldier(spawnpos, movedir, color(255,0,0));
-  if(spawnpos.x <= 500){//blue
+  //Decide side, default right
+  var movedir = new vec2(-1,0);
+  var newSoldier = new Soldier(spawnpos, movedir, rightArmyColor, leftArmyColor);
+  if(spawnpos.x <= 500){//left
     newSoldier.movedir.x = newSoldier.movedir.x*-1;
-    newSoldier.color = color(0,0,255);
+    newSoldier.color = leftArmyColor;
+    newSoldier.enemyColor = rightArmyColor;
   }
   
   soldiers.push(newSoldier);
   newSoldier.Show();
 }
 
+function KillSoldier(coords){
+  for(var i = 0; i < soldiers.length; i++){
+    if(soldiers[i].coords.equals(coords)){
+      soldiers.splice(i,1);
+      return;
+    }
+  }
+}
+
+function AddPoint(color){
+  if(color == leftArmyColor){
+    leftArmyPoints++;
+  }
+  else{
+    rightArmyPoints++;
+  }
+}
+
+
 class Soldier{
-    constructor(coords, movedir, color){
+    constructor(coords, movedir, color, enemyColor){
       this.coords = coords;
       this.movedir = movedir;
       this.color = color;
-      this.speed = .01;
+      this.enemyColor = enemyColor;
     }
-    FightOrMove(x,y){
-      
+    Act(){
+      var scanVec = this.movedir.multN(soldiersize);
+      var displayedPos = this.RoundedPos();
+      var soldierCenter = displayedPos.addN(soldiersize/2);
+      var samplePixelPos = soldierCenter.addV(scanVec);
+      loadPixels();
+      var samplePixelColor = get(samplePixelPos.x,samplePixelPos.y);
+
+      if(SameColor(samplePixelColor, this.enemyColor)){
+        this.Fight();
+      }
+      else if(SameColor(samplePixelColor, goalcolor)){
+        AddPoint(this.color);
+        KillSoldier(this.coords);
+      }
+      else if(SameColor(samplePixelColor, bgcolor)){
+        this.Move();
+      }
+    }
+    Fight(){
+      var r = random(1,10);
+      //die
+      if(r <= 5){
+        KillSoldier(this.coords);
+      }
+      //kill
+      else{
+        var enemyPos = this.coords.addV(this.movedir.multN(soldiersize));
+        KillSoldier(enemyPos);
+      }
     }
     Move(){
-      this.coords.x += this.movedir.x*this.speed*deltaTime;
-      this.coords.y += this.movedir.y*this.speed*deltaTime;
+      this.coords.x += this.movedir.x*soldiersize;
+      this.coords.y += this.movedir.y*soldiersize;
+      this.Show();
     }
     Show(){
       fill(this.color);
-      stroke(bgcolor);
+      noStroke();
       var pos = this.RoundedPos(this.coords.x, this.coords.y);
       rect(pos.x, pos.y, soldiersize, soldiersize);
     }
     Hide(){
-      fill(bgcolor);
-      stroke(bgcolor);
+      noStroke();
+      noFill();
       var pos = this.RoundedPos(this.coords.x, this.coords.y);
-      rect(pos.x, pox.y, soldiersize, soldiersize);
+      rect(pos.x, pos.y, soldiersize, soldiersize);
     }
     RoundedPos(){
-      return createVector(roundpixel(this.coords.x), roundpixel(this.coords.y));
+      return new vec2(roundpixel(this.coords.x), roundpixel(this.coords.y));
     }
 }
 
 //Returns the coordinates of a field on the raster. Dependent on mouse position.
 function rasterPositionFromMouse(){
-  return createVector(roundpixel(mouseX-soldiersize*1.5), roundpixel(mouseY-soldiersize*1.5));
+  return new vec2(roundpixel(mouseX-soldiersize*1.5), roundpixel(mouseY-soldiersize*1.5));
 }
 
 //Rundet auf die nächste 10. Also von 32 auf 30 z.B.
@@ -87,4 +183,10 @@ function roundpixel(pixel){
   var decimal = pixel/10;
   var rounded = round(decimal);
   return rounded*10;
+}
+
+//compares r,g,b values
+//returns true, if all 3 values of col1 match all 3 of col2
+function SameColor(col1,col2){
+  return red(col1) == red(col2) && green(col1) == green(col2) && blue(col1) == blue(col2);
 }

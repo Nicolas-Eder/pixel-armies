@@ -1,0 +1,21 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+.title {
+    font-size: 100px;
+    padding: 20px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: lightskyblue;
+    background: lightcoral;
+    width: 960px;
+}
+
+@font-face {
+    font-family: '8-bit_arcade_outmedium';
+    src: url('fonts/8-bit_arcade_out-webfont.woff2') format('woff2'),
+         url('fonts/8-bit_arcade_out-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
