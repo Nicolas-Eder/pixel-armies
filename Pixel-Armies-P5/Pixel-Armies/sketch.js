@@ -1,6 +1,6 @@
 'use strict';
 //Timing
-var simulationInterval = 1000;
+var simulationInterval = 700;
 var simulationtimer = 0;
 //Color
 var bgcolor;
@@ -13,13 +13,20 @@ var soldiers = [];
 //Points
 var leftArmyPoints = 0;
 var rightArmyPoints = 0;
+//html-elements
+var enemyName, enemyPoints, enemyReserves;
+var playerName, playerPoints, playerReserves;
 
 function setup() {
-  createCanvas(1000,500);
+  var canvas = createCanvas(1000,500);
+  canvas.parent("sketch");
   bgcolor = color(100);
   leftArmyColor = color(0,0,255);
   rightArmyColor = color(255,0,0);
   goalcolor = color(50);
+
+  enemyPoints = select('#enemyPoints');
+  playerPoints = select('#playerPoints');
 }
 function draw() {  
   loadPixels();
@@ -58,8 +65,9 @@ function DrawGUI(){
   rect(rastercoords.x, rastercoords.y, soldiersize, soldiersize);
 
   //score
-  text(leftArmyPoints + " Points",15,15);
-  text(rightArmyPoints + " Points",935,15);
+  enemyPoints.html("Points " + leftArmyPoints);
+  playerPoints.html(rightArmyPoints + " Points");
+  //troups
 }
 
 function DrawSoldiers(){

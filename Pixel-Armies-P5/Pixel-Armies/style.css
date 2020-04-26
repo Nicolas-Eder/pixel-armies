@@ -1,21 +1,72 @@
 * {
     margin: 0px;
     padding: 0px;
+    text-align: center;
+    font-family: 'freepixel';
 }
-.title {
+#title {
     font-size: 100px;
-    padding: 20px;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    padding: 20px 0px 0px 0px;
+    margin: 0px;
+    font-family: 'llpixel';
     color: lightskyblue;
-    background: lightcoral;
-    width: 960px;
+}
+
+#grid{
+    display: grid;
+    grid-template-columns:auto 500px 500px auto;
+    grid-template-rows: auto 500px;
+    grid-template-areas: 
+    ". enemy player ."
+    ". sketch sketch .";
+}
+.optionsgrid{
+    display: grid;
+    grid-template-columns: 500px;
+    grid-template-rows: auto auto auto;
+    background-color: gray;
+    color: lightgray;
+    padding: 10px 0px 10px 0px;
+}
+#enemyoptions{
+    grid-area: enemy;
+}
+#playeroptions{
+    grid-area: player;
+}
+.left{
+    background-color: gray;
+    text-align: left;
+    padding: 3px 0px 3px 15px;
+}
+.right{
+    background-color: gray;
+    text-align: right;
+    padding: 3px 15px 3px 0px;
+}
+
+
+
+#sketch{
+    padding: 0px;
+    grid-area: sketch;
+}
+
+#footer{
+    padding: 5px 0px 0px 0px;
 }
 
 @font-face {
-    font-family: '8-bit_arcade_outmedium';
-    src: url('fonts/8-bit_arcade_out-webfont.woff2') format('woff2'),
-         url('fonts/8-bit_arcade_out-webfont.woff') format('woff');
+    font-family: 'llpixel';
+    src: url('fonts/llpixel3-webfont.woff2') format('woff2'),
+         url('fonts/llpixel3-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-
+}
+@font-face {
+    font-family: 'freepixel';
+    src: url('fonts/freepixel-webfont.woff2') format('woff2'),
+         url('fonts/freepixel-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
 }
